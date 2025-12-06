@@ -136,7 +136,7 @@
   <!-- Main Card -->
   <div 
     bind:this={cardElement}
-    class="relative z-10 bg-white w-full max-w-md rounded-[2rem] shadow-2xl border border-white/50 backdrop-blur-sm transition-all duration-[800ms] cubic-bezier(0.34, 1.56, 0.64, 1) {isGenerated ? 'p-0 overflow-hidden' : 'p-8'}"
+    class="relative z-10 bg-white w-full max-w-md rounded-[2rem] shadow-2xl border border-white/50 backdrop-blur-sm transition-all duration-[800ms] cubic-bezier(0.34, 1.56, 0.64, 1) {isGenerated ? 'p-0 overflow-hidden' : 'p-8'} {showHistory ? 'h-[600px]' : ''}"
   >
     
     <!-- Control Bar -->
