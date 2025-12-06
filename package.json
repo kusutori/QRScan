@@ -9,8 +9,7 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "tauri": "tauri",
-    "android": "cross-env TAURI_DEV_HOST=192.168.31.132 tauri android dev"
+    "tauri": "tauri"
   },
   "license": "MIT",
   "dependencies": {
