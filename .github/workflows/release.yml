@@ -69,7 +69,7 @@ jobs:
         run: bun install
 
       - name: Build Android
-        run: bun tauri android build --apk
+        run: bun tauri android build --apk true
         
       - name: Get APK Path
         id: apk-path
