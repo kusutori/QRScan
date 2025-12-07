@@ -2,13 +2,14 @@
   import { onMount } from 'svelte';
   import { fade, fly } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
-  import { QrCode, Link, Copy, Download, Sparkles, Check } from 'lucide-svelte';
+  import { QrCode, Link, Copy, Download, Sparkles, Check, ArrowLeft } from 'lucide-svelte';
 
   let url = $state('');
   let isGenerated = $state(false);
   let qrSrc = $state('');
   let loading = $state(false);
   let copied = $state(false);
+  let showResultMobile = $state(false);
   
   // History logic (simplified for just saving)
   interface HistoryItem {
@@ -46,8 +47,13 @@
       qrSrc = apiUrl;
       loading = false;
       isGenerated = true;
+      showResultMobile = true;
       addToHistory(url);
     }, 600);
+  }
+
+  function handleMobileBack() {
+    showResultMobile = false;
   }
 
   async function handleDownload() {
@@ -88,10 +94,17 @@
     <h1 class="text-2xl font-bold text-slate-800 tracking-tight">生成二维码</h1>
   </div>
 
-  <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8 min-h-0 items-start">
-    <!-- Left Column: Input -->
-    <div class="flex flex-col gap-6">
-      <div class="bg-white/70 backdrop-blur-xl p-8 rounded-[2rem] shadow-2xl border border-white/50 transition-all duration-500 hover:shadow-indigo-100/50">
+  <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8 min-h-0 items-start perspective-1000 relative transition-all duration-1000 ease-in-out">
+    <!-- Left Column: Input (Front of Card on Mobile) -->
+    <div class="
+        flex flex-col gap-6 
+        col-start-1 row-start-1 
+        w-full
+        transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform-style-3d backface-hidden
+        md:col-start-1 md:row-start-1 md:transform-none md:opacity-100 md:relative md:pointer-events-auto
+        {showResultMobile ? 'max-md:[transform:rotateX(-180deg)] max-md:opacity-0 max-md:absolute max-md:pointer-events-none' : 'max-md:[transform:rotateX(0deg)] max-md:opacity-100 max-md:relative'}
+    ">
+      <div class="bg-white/70 backdrop-blur-xl p-8 rounded-[2rem] shadow-2xl border border-white/50 transition-all duration-500 hover:shadow-indigo-100/50 h-full">
         <label for="url-input" class="block text-sm font-bold text-slate-700 mb-4 ml-1">链接地址</label>
         <div class="relative group mb-8">
             <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-500 transition-colors duration-300">
@@ -122,8 +135,15 @@
       </div>
     </div>
 
-    <!-- Right Column: Preview -->
-    <div class="relative perspective-1000">
+    <!-- Right Column: Preview (Back of Card on Mobile) -->
+    <div class="
+        relative perspective-1000
+        col-start-1 row-start-1 
+        w-full
+        transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform-style-3d backface-hidden
+        md:col-start-2 md:row-start-1 md:transform-none md:opacity-100 md:relative md:pointer-events-auto
+        {showResultMobile ? 'max-md:[transform:rotateX(0deg)] max-md:opacity-100 max-md:relative' : 'max-md:[transform:rotateX(180deg)] max-md:opacity-0 max-md:absolute max-md:pointer-events-none'}
+    ">
         <div 
             class="
                 relative w-full bg-white/60 backdrop-blur-md border border-white/60 shadow-2xl flex flex-col overflow-hidden
@@ -133,6 +153,13 @@
             "
             style="min-height: {isGenerated ? '520px' : '400px'}"
         >
+            <!-- Mobile Back Button -->
+            <button 
+                onclick={handleMobileBack}
+                class="md:hidden absolute top-6 left-6 z-30 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-colors border border-white/20 shadow-lg"
+            >
+                <ArrowLeft size={24} />
+            </button>
             
             <!-- Dark Header for Preview (Overlay) -->
             <div 
@@ -195,5 +222,11 @@
 <style>
     .perspective-1000 {
         perspective: 1000px;
+    }
+    .transform-style-3d {
+        transform-style: preserve-3d;
+    }
+    .backface-hidden {
+        backface-visibility: hidden;
     }
 </style>
