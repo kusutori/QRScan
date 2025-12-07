@@ -2,9 +2,12 @@
   import "../app.css";
   import Sidebar from "$lib/components/Sidebar.svelte";
   import BottomNav from "$lib/components/BottomNav.svelte";
+  import { Toaster } from "svelte-sonner";
 
   let { children } = $props();
 </script>
+
+<Toaster position="top-center" richColors />
 
 <div class="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
   <!-- Desktop Sidebar -->

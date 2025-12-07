@@ -4,6 +4,11 @@
   import { cubicOut } from 'svelte/easing';
   import { QrCode, Link, Copy, Download, Sparkles, Check, ArrowLeft } from 'lucide-svelte';
   import { writeText } from '@tauri-apps/plugin-clipboard-manager';
+  import { toPng } from 'html-to-image';
+  import { save } from '@tauri-apps/plugin-dialog';
+  import { writeFile } from '@tauri-apps/plugin-fs';
+  import { platform } from '@tauri-apps/plugin-os';
+  import { toast } from 'svelte-sonner';
 
   let url = $state('');
   let isGenerated = $state(false);
@@ -69,19 +74,37 @@
   }
 
   async function handleDownload() {
-    if (!qrSrc) return;
+    if (!isGenerated) return;
+    
+    const card = document.getElementById('qr-card');
+    if (!card) return;
+
     try {
-      const response = await fetch(qrSrc);
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = `qrcode-${Date.now()}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        // Capture the card
+        const dataUrl = await toPng(card, { cacheBust: true, pixelRatio: 2 });
+        
+        // Convert base64 to Uint8Array
+        const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, '');
+        const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+        
+        const currentPlatform = platform();
+        const fileName = `qrcode-${Date.now()}.png`;
+
+        // Unified download logic for all platforms
+        // On Android, save() opens a system dialog returning a content URI
+        const filePath = await save({
+            defaultPath: fileName,
+            filters: [{ name: 'Image', extensions: ['png'] }]
+        });
+
+        if (filePath) {
+            await writeFile(filePath, binaryData);
+            toast.success('保存成功！');
+        }
+
     } catch (error) {
       console.error('Download failed', error);
+      toast.error('保存失败，请检查权限或重试');
     }
   }
 
@@ -161,6 +184,7 @@
         {showResultMobile ? 'max-md:[transform:rotateX(0deg)] max-md:opacity-100 max-md:relative' : 'max-md:[transform:rotateX(180deg)] max-md:opacity-0 max-md:absolute max-md:pointer-events-none'}
     ">
         <div 
+            id="qr-card"
             class="
                 relative w-full bg-white/60 backdrop-blur-md border border-white/60 shadow-2xl flex flex-col overflow-hidden
                 transition-all duration-700 cubic-bezier(0.34, 1.56, 0.64, 1)

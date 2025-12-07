@@ -7,6 +7,11 @@
     "core:default",
     "opener:default",
     "clipboard-manager:allow-write-text",
-    "clipboard-manager:allow-read-text"
+    "clipboard-manager:allow-read-text",
+    "fs:default",
+    "fs:allow-download-read-recursive",
+    "fs:allow-download-write-recursive",
+    "dialog:default",
+    "os:default"
   ]
 }
