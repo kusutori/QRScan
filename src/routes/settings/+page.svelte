@@ -29,7 +29,7 @@
       
       <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl transition-colors">
         <button 
-            onclick={() => setMode('light')}
+            onclick={() => setMode('light')} ontouchstart={() => setMode('light')}
             class="p-2 rounded-lg transition-all duration-200 {userPrefersMode.current === 'light' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}"
             title="浅色"
         >

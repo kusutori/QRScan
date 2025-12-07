@@ -3,7 +3,7 @@
   import { navItems } from '$lib/nav-items';
 </script>
 
-<div class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-50 safe-area-bottom">
+<div class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-[9999] safe-area-bottom">
   <nav class="flex items-center justify-around p-2">
     {#each navItems as item}
       {@const isActive = $page.url.pathname === item.href}

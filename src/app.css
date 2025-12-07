@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+button, a {
+  touch-action: manipulation;
+  cursor: pointer;
+}

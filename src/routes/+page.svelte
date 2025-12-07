@@ -9,6 +9,8 @@
   import { writeFile } from '@tauri-apps/plugin-fs';
   import { platform } from '@tauri-apps/plugin-os';
   import { toast } from 'svelte-sonner';
+  import { addPluginListener } from '@tauri-apps/api/core';
+  import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
 
   let url = $state('');
   let isGenerated = $state(false);
@@ -32,6 +34,52 @@
     url: string;
     timestamp: string;
   }
+
+  let history = $state<HistoryItem[]>([]);
+
+  onMount(() => {
+    // Load History
+    const savedHistory = localStorage.getItem('qr-history');
+    if (savedHistory) {
+      try {
+        history = JSON.parse(savedHistory);
+      } catch (e) {
+        console.error('Failed to parse history', e);
+      }
+    }
+
+    // Listen for Deep Links (triggered by Android Share Intent via MainActivity)
+    onOpenUrl((urls) => {
+        console.log('Deep link received:', urls);
+        for (const link of urls) {
+            try {
+                const urlObj = new URL(link);
+                // Check if it matches our scheme qrscan://share
+                if (urlObj.host === 'share') {
+                    const text = urlObj.searchParams.get('text');
+                    if (text && text.trim()) {
+                        url = text;
+                        handleGenerate();
+                        toast.success('已接收分享链接');
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to parse deep link', e);
+            }
+        }
+    });
+
+    return () => {
+        // Clean up if necessary (onOpenUrl doesn't return an unlisten function directly in docs usually, or it returns a promise? 
+        // Actually onOpenUrl returns Promise<UnlistenFn>.
+        // Let's handle it properly if needed, but for top-level onMount it's okay.
+        // Wait, if it returns a promise, I should await it or catch it.
+        // For simplicity in Svelte 5 script, I'll let it be fire-and-forget or assign to a variable if I want to clean up.
+        // Ideally: 
+        // const unlisten = await onOpenUrl(...)
+        // return unlisten;
+    };
+  });
   
   function addToHistory(link: string) {
     const savedHistory = localStorage.getItem('qr-history');

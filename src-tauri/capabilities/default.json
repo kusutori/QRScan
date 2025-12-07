@@ -12,6 +12,8 @@
     "fs:allow-download-read-recursive",
     "fs:allow-download-write-recursive",
     "dialog:default",
-    "os:default"
+    "os:default",
+    "sharetarget:default",
+    "deep-link:default"
   ]
 }
