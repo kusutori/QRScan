@@ -3,6 +3,7 @@
   import { fade, fly } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
   import { QrCode, Link, Copy, Download, Sparkles, Check, ArrowLeft } from 'lucide-svelte';
+  import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 
   let url = $state('');
   let isGenerated = $state(false);
@@ -10,14 +11,23 @@
   let loading = $state(false);
   let copied = $state(false);
   let showResultMobile = $state(false);
+  let headerGradientClass = $state('from-slate-900 to-slate-800');
+
+  const gradients = [
+    'from-indigo-900 to-slate-900',
+    'from-purple-900 to-slate-900', 
+    'from-blue-900 to-slate-900',
+    'from-emerald-900 to-slate-900',
+    'from-rose-900 to-slate-900',
+    'from-cyan-900 to-slate-900'
+  ];
   
-  // History logic (simplified for just saving)
   interface HistoryItem {
     id: number;
     url: string;
     timestamp: string;
   }
-
+  
   function addToHistory(link: string) {
     const savedHistory = localStorage.getItem('qr-history');
     let history: HistoryItem[] = [];
@@ -41,13 +51,15 @@
     
     loading = true;
     setTimeout(() => {
-      // In a real app, use a local library or better API. 
-      // qrserver is fine for prototype.
       const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}&bgcolor=ffffff&color=000000&qzone=1&margin=0`;
       qrSrc = apiUrl;
       loading = false;
       isGenerated = true;
       showResultMobile = true;
+      // Pick random gradient
+      const randomIdx = Math.floor(Math.random() * gradients.length);
+      headerGradientClass = gradients[randomIdx];
+
       addToHistory(url);
     }, 600);
   }
@@ -73,10 +85,14 @@
     }
   }
 
-  function handleCopyLink() {
-    navigator.clipboard.writeText(url);
-    copied = true;
-    setTimeout(() => copied = false, 2000);
+  async function handleCopyLink() {
+    try {
+        await writeText(url);
+        copied = true;
+        setTimeout(() => copied = false, 2000);
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+    }
   }
 
   function handleKeyDown(e: KeyboardEvent) {
@@ -163,14 +179,29 @@
             
             <!-- Dark Header for Preview (Overlay) -->
             <div 
-                class="absolute top-0 left-0 w-full bg-slate-900 z-0 transition-all duration-700 ease-out origin-top"
-                style="height: {isGenerated ? '120px' : '0px'}; opacity: {isGenerated ? 1 : 0}"
-            ></div>
+                class="absolute top-0 left-0 w-full z-0 transition-all duration-700 ease-out origin-top overflow-hidden"
+                style="height: {isGenerated ? '140px' : '0px'}; opacity: {isGenerated ? 1 : 0}"
+            >
+                <div class="w-full h-full bg-gradient-to-br {headerGradientClass} relative transition-colors duration-1000">
+                    <!-- Decorative Gradients (Subtle Overlay) -->
+                    <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl translate-x-10 -translate-y-10 mix-blend-overlay"></div>
+                    <div class="absolute bottom-0 left-0 w-40 h-40 bg-black/20 rounded-full blur-3xl -translate-x-10 translate-y-10 mix-blend-overlay"></div>
+                    
+                    <!-- Header Content -->
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pb-6">
+                         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 shadow-lg mb-2">
+                            <span class="text-lg animate-bounce">📱</span>
+                            <span class="text-white/90 text-xs font-bold tracking-widest uppercase">Scan Me</span>
+                         </div>
+                         <div class="text-white/40 text-[10px] font-mono tracking-widest">{new Date().toLocaleDateString()}</div>
+                    </div>
+                </div>
+            </div>
 
-            <div class="flex-1 flex flex-col items-center justify-center p-8 relative z-10">
+            <div class="flex-1 flex flex-col items-center justify-center p-8 relative z-10 mt-12">
                 {#if isGenerated}
-                    <div in:fly={{ y: 20, duration: 600, delay: 200, easing: cubicOut }} class="relative mt-6 mb-4 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-2 cursor-pointer">
-                         <div class="p-3 bg-white rounded-3xl shadow-2xl shadow-slate-900/10">
+                    <div in:fly={{ y: 20, duration: 600, delay: 200, easing: cubicOut }} class="relative mt-4 mb-4 transition-all duration-500 transform hover:scale-[1.05] hover:-translate-y-2 cursor-pointer">
+                         <div class="p-3 bg-white rounded-3xl shadow-2xl shadow-slate-900/20 ring-1 ring-white/50">
                             <div class="bg-white rounded-2xl overflow-hidden relative group-qr">
                                 <img 
                                     src={qrSrc} 
@@ -180,9 +211,6 @@
                                 <div class="absolute inset-0 bg-indigo-900/0 group-qr-hover:bg-indigo-900/5 transition-colors duration-300"></div>
                             </div>
                          </div>
-                    </div>
-                    <div in:fade={{ duration: 400, delay: 400 }} class="text-white/90 font-medium text-sm tracking-widest uppercase opacity-80">
-                        Scan to visit
                     </div>
                 {:else}
                     <div in:fade={{ duration: 300 }} class="text-slate-400 flex flex-col items-center gap-6 transition-all duration-500 absolute inset-0 flex items-center justify-center">
@@ -201,8 +229,18 @@
                             <Link size={16} />
                         </div>
                         <div class="flex-1 truncate text-sm text-slate-600 font-medium select-all">{url}</div>
-                        <button onclick={handleCopyLink} class="text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 p-2 rounded-xl transition-all active:scale-90" title="复制链接">
-                            {#if copied} <Check size={18} class="text-green-500"/> {:else} <Copy size={18}/> {/if}
+                        <button 
+                            onclick={handleCopyLink} 
+                            class="relative group-btn p-2 rounded-xl transition-all duration-300 active:scale-90 {copied ? 'bg-green-50 text-green-600' : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'}" 
+                            title="复制链接"
+                        >
+                            <div class="transition-all duration-300 transform {copied ? 'scale-100 rotate-0' : 'scale-100 rotate-0'}">
+                                {#if copied} 
+                                    <Check size={18} strokeWidth={3} /> 
+                                {:else} 
+                                    <Copy size={18} /> 
+                                {/if}
+                            </div>
                         </button>
                     </div>
                     <button 
