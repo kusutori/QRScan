@@ -48,16 +48,16 @@
 <div class="p-6 max-w-4xl mx-auto w-full pt-12 md:pt-6 h-full flex flex-col">
   <div class="flex items-center justify-between mb-8 shrink-0">
     <div class="flex items-center gap-4">
-        <div class="p-3 bg-purple-100 text-purple-600 rounded-xl">
+        <div class="p-3 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl transition-colors">
         <History size={24} />
         </div>
-        <h1 class="text-2xl font-bold">历史记录</h1>
+        <h1 class="text-2xl font-bold dark:text-white transition-colors">历史记录</h1>
     </div>
     
     {#if history.length > 0}
         <button 
             onclick={clearHistory}
-            class="flex items-center gap-2 px-4 py-2 text-red-500 bg-red-50 hover:bg-red-100 rounded-xl transition-colors text-sm font-medium"
+            class="flex items-center gap-2 px-4 py-2 text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl transition-colors text-sm font-medium"
         >
             <Trash2 size={16} />
             清空
@@ -65,10 +65,10 @@
     {/if}
   </div>
   
-  <div class="bg-white rounded-3xl border border-slate-200 shadow-sm flex-1 overflow-hidden flex flex-col">
+  <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex-1 overflow-hidden flex flex-col transition-colors">
      {#if history.length === 0}
-        <div class="flex-1 flex flex-col items-center justify-center text-slate-400 gap-4">
-            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
+        <div class="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-600 gap-4">
+            <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center transition-colors">
                 <Clock size={32} class="opacity-50" />
             </div>
             <p>暂无历史记录</p>
@@ -76,20 +76,20 @@
      {:else}
         <div class="overflow-y-auto p-4 space-y-2">
             {#each history as item (item.id)}
-                <div class="group bg-slate-50 hover:bg-white border border-slate-100 hover:border-indigo-200 rounded-xl p-4 flex items-center justify-between transition-all hover:shadow-md">
+                <div class="group bg-slate-50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-700/50 hover:border-indigo-200 dark:hover:border-indigo-500/30 rounded-xl p-4 flex items-center justify-between transition-all hover:shadow-md">
                     <div class="flex items-center gap-4 overflow-hidden flex-1">
-                        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-indigo-500 shadow-sm shrink-0 border border-slate-100">
+                        <div class="w-12 h-12 bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center text-indigo-500 dark:text-indigo-400 shadow-sm shrink-0 border border-slate-100 dark:border-slate-800 transition-colors">
                             <QrCode size={20} />
                         </div>
                         <div class="flex flex-col overflow-hidden">
-                            <span class="font-medium text-slate-700 truncate">{item.url}</span>
-                            <span class="text-xs text-slate-400 mt-1">{formatTime(item.timestamp)}</span>
+                            <span class="font-medium text-slate-700 dark:text-slate-200 truncate transition-colors">{item.url}</span>
+                            <span class="text-xs text-slate-400 dark:text-slate-500 mt-1 transition-colors">{formatTime(item.timestamp)}</span>
                         </div>
                     </div>
                     
                     <button 
                         onclick={(e) => deleteHistoryItem(e, item.id)}
-                        class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                        class="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                         title="删除"
                     >
                         <Trash2 size={18} />

@@ -101,7 +101,7 @@ jobs:
           fi
 
       - name: Build Android
-        run: bun tauri android build --apk
+        run: bun tauri android build --apk true
 
       - name: Upload Android Assets
         uses: softprops/action-gh-release@v1
