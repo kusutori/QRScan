@@ -20,7 +20,9 @@
     "@tauri-apps/plugin-fs": "^2.4.4",
     "@tauri-apps/plugin-opener": "^2",
     "@tauri-apps/plugin-os": "^2.3.2",
+    "@tauri-apps/plugin-shell": "^2.3.3",
     "html-to-image": "^1.11.13",
+    "html5-qrcode": "^2.3.8",
     "mode-watcher": "^1.1.0",
     "svelte-sonner": "^1.0.7",
     "tauri-plugin-sharetarget-api": "^0.1.6"

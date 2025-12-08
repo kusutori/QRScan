@@ -14,6 +14,7 @@
     "dialog:default",
     "os:default",
     "sharetarget:default",
-    "deep-link:default"
+    "deep-link:default",
+    "shell:allow-open"
   ]
 }
