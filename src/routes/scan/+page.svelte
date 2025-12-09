@@ -14,6 +14,7 @@
   let showScanner = $state(false); 
   let html5QrCode = $state<Html5Qrcode | null>(null);
   let fileInput = $state<HTMLInputElement | undefined>(undefined);
+  let cameraInput = $state<HTMLInputElement | undefined>(undefined);
 
   const isMobile = ['android', 'ios'].includes(platform());
 
@@ -42,31 +43,12 @@
     result = '';
     
     if (isMobile) {
-      try {
-        const permission = await checkPermissions();
-        
-        if (permission === 'denied' || permission === 'prompt' || permission === 'prompt-with-rationale') {
-            const request = await requestPermissions();
-            if (request !== 'granted') {
-                toast.error('请在设置中允许使用相机');
-                return;
-            }
-        }
-        
-        toast.info('正在启动相机...');
-        const scanned = await scan({
-            formats: [Format.QRCode], // Fixed enum member
-            windowed: false 
-        });
-        
-        if (scanned.content) {
-            result = scanned.content;
-            toast.success('扫码成功');
-        }
-      } catch (e: any) {
-        console.error(e);
-        error = '无法启动相机';
-        toast.error('启动失败: ' + e.message);
+      // Mobile: Use native camera intent via file input
+      console.log('Triggering mobile camera', cameraInput);
+      if (cameraInput) {
+          cameraInput.click();
+      } else {
+          toast.error('无法启动相机组件');
       }
     } else {
       // Desktop
@@ -76,11 +58,16 @@
       }
       
       // Explicitly request permission first
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          toast.error('当前环境不支持访问摄像头 (MediaDevices API missing)');
+          return;
+      }
+
       try {
           await navigator.mediaDevices.getUserMedia({ video: true });
-      } catch (err) {
+      } catch (err: any) {
           console.error('Permission denied', err);
-          toast.error('无法访问摄像头，请在系统设置或浏览器中允许权限');
+          toast.error(`无法访问摄像头: ${err.name} - ${err.message}`);
           return;
       }
       
@@ -259,11 +246,22 @@
       </button>
     </div>
 
+    <!-- Hidden inputs (Visually hidden but present in DOM) -->
     <input
       type="file"
       accept="image/*"
-      class="hidden"
+      class="opacity-0 absolute pointer-events-none w-0 h-0"
       bind:this={fileInput}
+      onchange={onFileSelected}
+    />
+    
+    <!-- Camera Capture Input (Mobile only) -->
+    <input
+      type="file"
+      accept="image/*"
+      capture="environment"
+      class="opacity-0 absolute pointer-events-none w-0 h-0"
+      bind:this={cameraInput}
       onchange={onFileSelected}
     />
 
